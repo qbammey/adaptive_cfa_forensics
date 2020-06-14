@@ -28,19 +28,19 @@ detect_forgeries_interactive.py [-h] [-m MODEL] [-j JPEG]
                                        input
 The model can be specified with -m. By default, uses the pretrained model (not retrained on the database).
 
-## Detect forgeries on multiple images with the proposed method, and store the results in one .npz file:
-detect_forgeries_multiple.py [-h] [-m MODEL] [-j JPEG] [-b BLOCK_SIZE]
+## Detect forgeries on an image with the proposed method, and write the result in a png image:
+detect_forgeries.py [-h] [-m MODEL] [-j JPEG] [-b BLOCK_SIZE]
                                     [-o OUT]
                                     input [input ...]
 The model can be specified with -m. By default, uses the pretrained model (not retrained on the database).
 
-## Detect forgeries on multiple images with the intermediate values method, and store the results in one .npz file:
+## Detect forgeries on multiple images with the intermediate values method:
 choi_intermediate_values.py [-h] [-j JPEG] [-b BLOCK_SIZE] [-o OUT]
                                    input [input ...]
 This is an implementation of the method described in
 Choi, C., Choi, J., & Lee, H. (2011). CFA pattern identification of digital cameras using intermediate value counting. MM&Sec'11.
 
-## Detect forgeries on multiple images with the variance of colour difference method, and store the results in one .npz file:
+## Detect forgeries on multiple images with the variance of colour difference method:
 shin_variance.py [-h] [-j JPEG] [-b BLOCK_SIZE] [-o OUT]
                         input [input ...]
 This is an implementation of the method described in
