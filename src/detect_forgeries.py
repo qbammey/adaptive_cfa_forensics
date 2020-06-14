@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Detect forgeries on multiple images with the proposed method."""
+"""Detect forgeries with the proposed method."""
 
 import os
 import sys
@@ -41,8 +41,10 @@ def get_parser():
         "-o",
         "--out",
         type=str,
-        default="out.png",
-        help="Path to output detected forgeries. Default: out.png")
+        default=None,
+        help=
+        "If provided; path to output image. By default, results will be plotted interactively."
+    )
     parser.add_argument("input", type=str, help="Image to analyse.")
     return parser
 
@@ -66,8 +68,8 @@ if __name__ == "__main__":
         img /= 255
     if quality is not None:
         img = jpeg_compress(img, quality)
-    img = img_to_tensor(img).cuda().type(torch.float)
-    res = np.exp(net(img, block_size).detach().cpu().numpy())
+    img_t = img_to_tensor(img).cuda().type(torch.float)
+    res = np.exp(net(img_t, block_size).detach().cpu().numpy())
     res[:, 1] = res[([1, 0, 3, 2], 1)]
     res[:, 2] = res[([2, 3, 0, 1], 2)]
     res[:, 3] = res[([3, 2, 1, 0], 3)]
@@ -78,11 +80,40 @@ if __name__ == "__main__":
     confidence[confidence < 0] = 0
     confidence[confidence > 1] = 1
     confidence[authentic] = 1
-    error_map = 1 - confidence  # highest values (white) correspond to suspected forgeries
-    # Resample the output to match the original image size
-    error_map = np.repeat(np.repeat(error_map, block_size, axis=0),
-                          block_size,
-                          axis=1)
-    output = np.zeros((Y_o, X_o))
-    output[:error_map.shape[0], :error_map.shape[1]] = error_map
-    plt.imsave(out, output)
+    if out is not None:
+        error_map = 1 - confidence  # highest values (white) correspond to suspected forgeries
+        # Resample the output to match the original image size
+        error_map = np.repeat(np.repeat(error_map, block_size, axis=0),
+                              block_size,
+                              axis=1)
+        output = np.zeros((Y_o, X_o))
+        output[:error_map.shape[0], :error_map.shape[1]] = error_map
+        plt.imsave(out, output)
+    else:
+        confidence = confidence.repeat(block_size, axis=0).repeat(
+            block_size, axis=1)  # Make it the same size as image
+        img = img[4:-4, 4:-4]
+        Y, X, C = img.shape
+        Y -= Y % block_size
+        X -= X % block_size
+        img = img[:Y, :X]
+        fig, ax = plt.subplots(1, 2, sharex=True, sharey=True)
+        ax[0].imshow(img)
+        ax[0].axis('off')
+        ax[0].set_title('Input image')
+        ax[1].matshow(confidence, vmin=0, vmax=1)
+        cbar = plt.colorbar(
+            mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(0, 1)),
+            ax=ax,
+            ticks=[0, .2, .4, .6, .8, 1])
+        cbar.ax.set_yticklabels(
+            ['0 (Forged)', '.2', '.4', '.6', '.8', '1 (No detection)'])
+        ax[1].axis('off')
+        ax[1].set_title('Detected forgeries')
+        plt.show()
+        plt.imshow(img * confidence[:, :, None] +
+                   np.array([1., 0., 0.])[None, None] *
+                   (1 - confidence[:, :, None]))
+        plt.title('Detected forgeries')
+        plt.axis('off')
+        plt.show()
