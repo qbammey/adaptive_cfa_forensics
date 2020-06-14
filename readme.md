@@ -16,11 +16,11 @@ detect_forgeries_multiple.py
 train_model.py
 
 # Dataset
-The dataset can be found [here](http://dev.ipol.im/~qbammey/dresden_demosaicing_forgery_detection_dataset_v1/).
+The dataset used in our article can be found [here](http://dev.ipol.im/~qbammey/dresden_demosaicing_forgery_detection_dataset_v1/).
 
 # Usage
 
-### Train or retrain a network
+### Train or retrain a network
 ```
 train_model.py [-h] [-m MODEL] [-j JPEG] [-b BLOCK_SIZE] [-o OUT]
                       [-l LEARNING_RATE] [-a EPOCHS_AUXILIARY]
